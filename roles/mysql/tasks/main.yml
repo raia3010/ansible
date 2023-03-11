@@ -1,0 +1,75 @@
+- name: MySQL | Install mysql and python-mysqldb packages
+  tags: mysql,python_mysqldb
+  apt:
+    name:
+      - mysql-server
+      - python-mysqldb
+    state: latest
+
+- name: MySQL | Start and enable mysql service
+  tags: mysqlenabled
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: MySQL | Generate mysqld.cnf file from template
+  tags: mysqldfile
+  template:
+    src: templates/mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+#  notify: restart_mysql
+
+#- name: Flush Handlers   
+#  meta: flush_handlers
+
+- name: MySQL | Create replication user
+  mysql_user:
+    name: "{{ user }}"
+    password: "{{ password }}"
+    host: "%"
+    priv: "*.*:REPLICATION SLAVE"
+    state: present
+ 
+- name: MySQL | Create user
+  mysql_user:
+    name: "{{ user }}_a"
+    password: "{{ password }}"
+    host: "%"
+    priv: "*.*:All,GRANT"
+    state: present
+  notify: restart_mysql
+
+- name: MySQL | Flush Handlers
+  meta: flush_handlers
+
+#- name: restart_mysql
+#  service:
+#    name: mysql
+#    state: restarted
+
+- name: MySQL | Get master file and position
+  mysql_replication:
+    login_host: "{{ host_master }}"
+    login_user: "{{ user }}_a"
+    login_password: "{{ password }}"
+    mode: getmaster
+  register: mysql_repl
+ 
+- name: MySQL | Stop slave
+  mysql_replication:
+    mode: stopslave
+    
+- name: MySQL | Change master to master
+  mysql_replication: 
+    mode: changemaster
+    master_host: "{{ host_master }}"
+    master_user: "{{ user }}"
+    master_password: "{{ password }}"
+    master_log_file: "{{ mysql_repl.File }}" 
+    master_log_pos: "{{ mysql_repl.Position }}"
+#  notify: start_slave
+
+- name: MySQL | Start slave
+  mysql_replication:
+    mode: startslave

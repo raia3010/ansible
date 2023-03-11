@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: Update repository index (Ubuntu)
+    tags: always
+    apt:
+      update_cache: yes
+#    changed_when: false
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: haproxy_keepaliveds
+  become: true
+  roles:
+    - keepalived
+
+- hosts: haproxy_keepaliveds
+  become: true
+  roles:
+    - haproxy
+
+- hosts: mysqls
+  become: true
+  roles:
+    - mysql

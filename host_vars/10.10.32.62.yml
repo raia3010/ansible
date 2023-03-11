@@ -1,0 +1,7 @@
+haproxy_package_name: haproxy
+haproxy_service: haproxy
+haproxy_template_file: haproxy.cfg.j2
+keepalive_template_file: keepalived.conf.j2
+keepalived_priority: 99
+keepalived_state: BACKUP
+router_id_keepalived: haproxy2

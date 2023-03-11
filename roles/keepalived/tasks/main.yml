@@ -1,0 +1,29 @@
+- name: Keepalived | Allow binding non-local IPv4
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: "1"
+    reload: true
+    state: present
+
+- name: Keepalived | Install keepalived packages
+  tags: keepalived
+  package:
+    name:
+      - keepalived
+    state: latest
+
+- name: Keepalived | Start and enable keepalived service
+  tags: keepalivedenabled
+  service:
+    name: keepalived
+    state: started
+    enabled: yes
+
+- name: Keepalived | Generate keepalived.conf file from template
+  tags: keepalivedfile
+  template:
+    src: templates/keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify: restart_keepalived
+
+

@@ -1,0 +1,4 @@
+haproxy_bind_address: 10.10.32.222
+haproxy_balancing_mysqls:
+  - { name: 'mysql1', ip: "10.10.32.101" }
+  - { name: 'mysql2', ip: "10.10.32.102" }

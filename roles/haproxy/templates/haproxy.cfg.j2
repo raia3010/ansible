@@ -1,0 +1,22 @@
+global
+        log 127.0.0.1 local0 notice
+        user haproxy
+        group haproxy
+        maxconn 256
+        daemon
+    defaults
+        log global
+        retries 2
+        timeout connect 5000ms
+        timeout client  50000ms
+        timeout server  50000ms
+
+    listen mysql-cluster
+        bind {{ haproxy_bind_address }}:3306
+        mode tcp
+#        option mysql-check user haproxy_checkstatus
+
+        balance roundrobin
+        {% for balancing_server in haproxy_balancing_mysqls %}
+            server {{ balancing_server.name }} {{ balancing_server.ip }}:3306 check
+        {% endfor %}

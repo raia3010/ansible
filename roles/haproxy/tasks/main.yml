@@ -1,0 +1,20 @@
+- name: HAproxy | Install haproxy packages
+  tags: haproxy
+  package:
+    name:
+      - haproxy
+    state: latest
+    
+- name: HAproxy | Start and enable haproxy service
+  tags: haproxyenabled
+  service:
+    name: haproxy
+    state: started
+    enabled: yes
+
+- name: HAproxy | Generate haproxy.cfg file from template
+  tags: haproxyfile
+  template:
+    src: templates/haproxy.cfg.j2 
+    dest: /etc/haproxy/haproxy.cfg
+  notify: restart_haproxy
